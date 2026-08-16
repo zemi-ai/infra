@@ -46,6 +46,19 @@ Pinned defaults: `project_id = zemi-prod`, `region = northamerica-northeast1`.
 
 Do **not** put datasets, models, or client names in this repo.
 
+## Object keys (`gs://zemi-prod-datasets`)
+
+`orgId` is a minted tenant id (Firebase custom claim), not a Firebase uid.
+
+```
+customers/{orgId}/projects/{projectId}/raw/{domain}/{relativePath}
+customers/{orgId}/projects/{projectId}/processed/{domain}/{product}
+customers/{orgId}/projects/{projectId}/uploads/{sessionId}/manifest.json
+customers/{orgId}/models/{modelId}/          # later: unified model across projects
+```
+
+`domain` is the pipeline name: `geophysics`, `geochemistry`, `geology`, `remote_sensing` (portal `remote-sensing` maps to `remote_sensing`).
+
 ## Layout
 
 | File | Purpose |
@@ -53,5 +66,6 @@ Do **not** put datasets, models, or client names in this repo.
 | `versions.tf` | Terraform + Google provider pins |
 | `backend.tf` | GCS state (`gs://zemi-prod-tfstate`) |
 | `providers.tf` | Google provider |
-| `variables.tf` | `project_id`, `region` |
-| `main.tf` | Resources (empty until ZEM-22) |
+| `variables.tf` | `project_id`, `region`, bucket/CORS |
+| `apis.tf` | Project APIs |
+| `datasets.tf` | Landing bucket, portal SA, IAM |
