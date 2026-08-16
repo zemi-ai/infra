@@ -1,3 +1,2 @@
-# Intentionally no resources yet.
-# ZEM-22 adds gs://zemi-prod-datasets (CORS + IAM).
-# Follow-ons add Artifact Registry, the TMI→RTP Cloud Run Job, and job-run IAM.
+# Root resources live in apis.tf and datasets.tf (ZEM-22).
+# Follow-ons: Artifact Registry, TMI→RTP Cloud Run Job, job-run IAM.
