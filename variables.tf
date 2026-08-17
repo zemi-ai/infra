@@ -6,7 +6,7 @@ variable "project_id" {
 
 variable "region" {
   type        = string
-  description = "Default region. Datasets bucket, Artifact Registry, and Cloud Run Job must use this."
+  description = "Default region. Datasets bucket, Artifact Registry, and Cloud Run Job must use this. App Hosting is us-east4 (not available in Canada)."
   default     = "northamerica-northeast1"
 }
 
@@ -23,6 +23,12 @@ variable "datasets_cors_origins" {
     "http://localhost:3000",
     "https://portal.zemi.ca",
   ]
+}
+
+variable "data_pipelines_repository_id" {
+  type        = string
+  description = "Artifact Registry Docker repo for data-pipelines images."
+  default     = "data-pipelines"
 }
 
 variable "extra_signing_members" {
