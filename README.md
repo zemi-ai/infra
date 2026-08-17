@@ -34,6 +34,19 @@ terraform apply   # only after reviewing the plan; do not apply unattended
 
 Pinned defaults: `project_id = zemi-prod`, `region = northamerica-northeast1`.
 
+## Regions
+
+Two regions on purpose. Do not collapse them to make `gcloud` flags uniform.
+
+| What | Region | Why |
+| --- | --- | --- |
+| GCS datasets, tfstate, Artifact Registry, Cloud Run Jobs | `northamerica-northeast1` (Montreal) | Survey rasters stay in Canada. Jobs read/write the bucket in-region. |
+| Firebase App Hosting (portal) | `us-east4` | App Hosting has no Canada region. |
+
+**Commands:** `--region=northamerica-northeast1` (or omit and use the Terraform default) for Storage, Artifact Registry, and Cloud Run Jobs. Portal deploys are Firebase App Hosting, not `gcloud run deploy`. Image hostnames include the region: `northamerica-northeast1-docker.pkg.dev/zemi-prod/data-pipelines/…`.
+
+Browser uploads go **directly to Montreal GCS** (signed PUT). App Hosting only mints the URL — that cross-region hop is metadata, not the grid.
+
 ## What belongs here
 
 | In Terraform | Console / wizard |
@@ -69,3 +82,13 @@ customers/{orgId}/models/{modelId}/          # later: unified model across proje
 | `variables.tf` | `project_id`, `region`, bucket/CORS |
 | `apis.tf` | Project APIs |
 | `datasets.tf` | Landing bucket, portal SA, IAM |
+| `artifact_registry.tf` | Docker repo `data-pipelines` (TMI→RTP image) |
+
+Image build/push is Docker or Cloud Build in **data-pipelines**, not Terraform. After apply:
+
+```bash
+# from data-pipelines
+gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
+docker build -t northamerica-northeast1-docker.pkg.dev/zemi-prod/data-pipelines/tmi-rtp:$(git rev-parse --short HEAD) .
+docker push northamerica-northeast1-docker.pkg.dev/zemi-prod/data-pipelines/tmi-rtp:$(git rev-parse --short HEAD)
+```
