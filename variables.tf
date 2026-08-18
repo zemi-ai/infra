@@ -63,8 +63,8 @@ variable "tmi_rtp_scratch_disk" {
 
 variable "tmi_rtp_timeout" {
   type        = string
-  description = "Per-attempt task timeout."
-  default     = "3600s"
+  description = "Per-attempt task timeout. Demo grids should finish in under a minute; raise if a real survey hits the deadline."
+  default     = "60s"
 }
 
 variable "extra_signing_members" {
