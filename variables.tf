@@ -69,6 +69,6 @@ variable "tmi_rtp_timeout" {
 
 variable "extra_signing_members" {
   type        = list(string)
-  description = "Additional IAM members (serviceAccount:...) with objectAdmin on the datasets bucket. The App Hosting compute SA is granted separately."
+  description = "Additional IAM members with objectUser on datasets raw/ and uploads/ prefixes (same scope as the portal)."
   default     = []
 }

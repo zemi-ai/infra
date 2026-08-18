@@ -22,10 +22,13 @@ resource "google_storage_bucket" "datasets" {
 
 locals {
   apphosting_compute_member = "serviceAccount:firebase-app-hosting-compute@${var.project_id}.iam.gserviceaccount.com"
+  # Object IAM is on this bucket only (not project-wide). Portal may touch
+  # raw uploads and session manifests, not processed/ or models/.
+  portal_object_cel         = "resource.name.matches('^projects/_/buckets/${google_storage_bucket.datasets.name}/objects/customers/[^/]+/projects/[^/]+/(raw|uploads)/.*$')"
 }
 
-# Portal signs V4 URLs as this SA (local next dev). App Hosting signs as
-# firebase-app-hosting-compute@, which gets objectAdmin below.
+# Local next dev IAM-signs as this SA. App Hosting signs as
+# firebase-app-hosting-compute@. Both are scoped to raw/ and uploads/.
 resource "google_service_account" "portal" {
   account_id   = "portal"
   display_name = "Zemi portal (signed GCS uploads)"
@@ -34,10 +37,16 @@ resource "google_service_account" "portal" {
   depends_on = [google_project_service.apis]
 }
 
-resource "google_storage_bucket_iam_member" "portal_object_admin" {
+resource "google_storage_bucket_iam_member" "portal_objects" {
   bucket = google_storage_bucket.datasets.name
-  role   = "roles/storage.objectAdmin"
+  role   = "roles/storage.objectUser"
   member = google_service_account.portal.member
+
+  condition {
+    title       = "raw-and-uploads"
+    description = "customers/*/projects/*/raw and customers/*/projects/*/uploads only"
+    expression  = local.portal_object_cel
+  }
 }
 
 resource "google_service_account_iam_member" "portal_sign_blobs" {
@@ -46,10 +55,16 @@ resource "google_service_account_iam_member" "portal_sign_blobs" {
   member             = google_service_account.portal.member
 }
 
-resource "google_storage_bucket_iam_member" "apphosting_compute_object_admin" {
+resource "google_storage_bucket_iam_member" "apphosting_compute_objects" {
   bucket = google_storage_bucket.datasets.name
-  role   = "roles/storage.objectAdmin"
+  role   = "roles/storage.objectUser"
   member = local.apphosting_compute_member
+
+  condition {
+    title       = "raw-and-uploads"
+    description = "customers/*/projects/*/raw and customers/*/projects/*/uploads only"
+    expression  = local.portal_object_cel
+  }
 }
 
 resource "google_service_account_iam_member" "apphosting_compute_sign_blobs" {
@@ -58,10 +73,26 @@ resource "google_service_account_iam_member" "apphosting_compute_sign_blobs" {
   member             = local.apphosting_compute_member
 }
 
-resource "google_storage_bucket_iam_member" "extra_object_admin" {
+resource "google_storage_bucket_iam_member" "extra_objects" {
   for_each = toset(var.extra_signing_members)
 
   bucket = google_storage_bucket.datasets.name
-  role   = "roles/storage.objectAdmin"
+  role   = "roles/storage.objectUser"
   member = each.value
+
+  condition {
+    title       = "raw-and-uploads"
+    description = "customers/*/projects/*/raw and customers/*/projects/*/uploads only"
+    expression  = local.portal_object_cel
+  }
+}
+
+moved {
+  from = google_storage_bucket_iam_member.portal_object_admin
+  to   = google_storage_bucket_iam_member.portal_objects
+}
+
+moved {
+  from = google_storage_bucket_iam_member.extra_object_admin
+  to   = google_storage_bucket_iam_member.extra_objects
 }
