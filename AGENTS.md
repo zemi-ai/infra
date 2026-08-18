@@ -8,3 +8,7 @@ Use the Linear identifier only, lowercase: `zem-24`.
 - No username, no title slug, no extra path segments.
 - One ticket → one branch name, even across repos (`zem-24` in infra and in data-pipelines if both change).
 - If there is no ticket, use a short topic (`cors`, `tf-backend`) — still no username.
+
+## Tickets
+
+Linear ids belong in branch names and PR titles. Do **not** put `ZEM-24` (or any ticket id) in source, comments, Terraform, or README.
