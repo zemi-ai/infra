@@ -22,9 +22,9 @@ resource "google_storage_bucket" "datasets" {
 
 locals {
   apphosting_compute_member = "serviceAccount:firebase-app-hosting-compute@${var.project_id}.iam.gserviceaccount.com"
-  # Object IAM is on this bucket only (not project-wide). Portal may touch
-  # raw uploads and session manifests, not processed/ or models/.
-  portal_object_cel         = "resource.name.matches('^projects/_/buckets/${google_storage_bucket.datasets.name}/objects/customers/[^/]+/projects/[^/]+/(raw|uploads)/.*$')"
+  # GCS IAM conditions allow startsWith/endsWith/extract, not matches().
+  # extract() picks the path segment after .../projects/{id}/ (raw vs uploads).
+  portal_object_cel         = "resource.name.startsWith('projects/_/buckets/${google_storage_bucket.datasets.name}/objects/customers/') && (resource.name.extract('/objects/customers/{org}/projects/{proj}/{kind}/') == 'raw' || resource.name.extract('/objects/customers/{org}/projects/{proj}/{kind}/') == 'uploads')"
 }
 
 # Local next dev IAM-signs as this SA. App Hosting signs as
