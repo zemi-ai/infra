@@ -3,6 +3,7 @@ resource "google_project_service" "apis" {
     "iam.googleapis.com",
     "storage.googleapis.com",
     "artifactregistry.googleapis.com",
+    "run.googleapis.com",
   ])
 
   project            = var.project_id
