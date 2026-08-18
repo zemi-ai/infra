@@ -103,7 +103,7 @@ The Job resource has no `INPUT_GS` baked in. Pass survey params per execution. `
 gcloud run jobs execute tmi-rtp \
   --region=northamerica-northeast1 \
   --project=zemi-prod \
-  --update-env-vars=INPUT_GS=gs://zemi-prod-datasets/customers/ORG/projects/PROJECT/raw/geophysics/survey.grd,OUTPUT_PREFIX_GS=gs://zemi-prod-datasets/customers/ORG/projects/PROJECT/processed/geophysics,SURVEY_YEAR=2022,SURVEY_ELEVATION_M=1690,INPUT_CRS=EPSG:32614
+  --update-env-vars=ORG_ID=ORG,INPUT_GS=gs://zemi-prod-datasets/customers/ORG/projects/PROJECT/raw/geophysics/survey.grd,OUTPUT_PREFIX_GS=gs://zemi-prod-datasets/customers/ORG/projects/PROJECT/processed/geophysics,SURVEY_YEAR=2022,SURVEY_ELEVATION_M=1690,INPUT_CRS=EPSG:32614
 ```
 
-Required env: `INPUT_GS`, `OUTPUT_PREFIX_GS`, `SURVEY_YEAR`, `SURVEY_ELEVATION_M`. `INPUT_CRS` is required for Geosoft `.grd`. Outputs: `{stem}_rtp.tif`, `_anomaly.tif`, `_rtp_color.tif`, `_rtp_color.png`.
+Required env: `ORG_ID`, `INPUT_GS`, `OUTPUT_PREFIX_GS`, `SURVEY_YEAR`, `SURVEY_ELEVATION_M`. Both URIs must be under `customers/{ORG_ID}/`. `INPUT_CRS` is required for Geosoft `.grd`. Outputs: `{stem}_rtp.tif`, `_anomaly.tif`, `_rtp_color.tif`, `_rtp_color.png`.
