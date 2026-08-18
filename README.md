@@ -79,16 +79,31 @@ customers/{orgId}/models/{modelId}/          # later: unified model across proje
 | `versions.tf` | Terraform + Google provider pins |
 | `backend.tf` | GCS state (`gs://zemi-prod-tfstate`) |
 | `providers.tf` | Google provider |
-| `variables.tf` | `project_id`, `region`, bucket/CORS |
+| `variables.tf` | `project_id`, `region`, bucket/CORS, job image digest |
 | `apis.tf` | Project APIs |
 | `datasets.tf` | Landing bucket, portal SA, IAM |
 | `artifact_registry.tf` | Docker repo `data-pipelines` (TMI→RTP image) |
+| `tmi_rtp_job.tf` | Cloud Run Job `tmi-rtp` + job SA |
 
-Image build/push is Docker or Cloud Build in **data-pipelines**, not Terraform. After apply:
+Image build/push is Docker or Cloud Build in **data-pipelines**, not Terraform. After apply, pin the new digest in `tmi_rtp_image` and re-apply.
 
 ```bash
-# from data-pipelines
+# from data-pipelines (linux/amd64 — Cloud Run will not run a Mac ARM image)
 gcloud auth configure-docker northamerica-northeast1-docker.pkg.dev
-docker build -t northamerica-northeast1-docker.pkg.dev/zemi-prod/data-pipelines/tmi-rtp:$(git rev-parse --short HEAD) .
+docker build --platform linux/amd64 \
+  -t northamerica-northeast1-docker.pkg.dev/zemi-prod/data-pipelines/tmi-rtp:$(git rev-parse --short HEAD) .
 docker push northamerica-northeast1-docker.pkg.dev/zemi-prod/data-pipelines/tmi-rtp:$(git rev-parse --short HEAD)
 ```
+
+## TMI→RTP job (execute)
+
+The Job resource has no `INPUT_GS` baked in. Pass survey params per execution. `OUTPUT_PREFIX_GS` is the domain prefix (`…/processed/geophysics`), not a filename.
+
+```bash
+gcloud run jobs execute tmi-rtp \
+  --region=northamerica-northeast1 \
+  --project=zemi-prod \
+  --update-env-vars=INPUT_GS=gs://zemi-prod-datasets/customers/ORG/projects/PROJECT/raw/geophysics/survey.grd,OUTPUT_PREFIX_GS=gs://zemi-prod-datasets/customers/ORG/projects/PROJECT/processed/geophysics,SURVEY_YEAR=2022,SURVEY_ELEVATION_M=1690,INPUT_CRS=EPSG:32614
+```
+
+Required env: `INPUT_GS`, `OUTPUT_PREFIX_GS`, `SURVEY_YEAR`, `SURVEY_ELEVATION_M`. `INPUT_CRS` is required for Geosoft `.grd`. Outputs: `{stem}_rtp.tif`, `_anomaly.tif`, `_rtp_color.tif`, `_rtp_color.png`.
