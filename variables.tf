@@ -57,7 +57,7 @@ variable "tmi_rtp_memory" {
 
 variable "tmi_rtp_scratch_disk" {
   type        = string
-  description = "DISK emptyDir size for WORK_DIR (rasters; not RAM)."
+  description = "emptyDir size for WORK_DIR (disk, not RAM). Provider uses medium \"\" for disk."
   default     = "16Gi"
 }
 

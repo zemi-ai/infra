@@ -65,7 +65,8 @@ resource "google_cloud_run_v2_job" "tmi_rtp" {
       volumes {
         name = "scratch"
         empty_dir {
-          medium     = "DISK"
+          # Provider enum is MEMORY or "" (disk). "DISK" is rejected on google 6.x.
+          medium     = ""
           size_limit = var.tmi_rtp_scratch_disk
         }
       }
