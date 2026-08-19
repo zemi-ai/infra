@@ -69,6 +69,6 @@ variable "tmi_rtp_timeout" {
 
 variable "extra_signing_members" {
   type        = list(string)
-  description = "Additional IAM members with objectUser on datasets raw/ and uploads/ prefixes (same scope as the portal)."
+  description = "Additional IAM members with objectUser on datasets raw/ and uploads/ prefixes and objectViewer on processed/ (same scope as the portal)."
   default     = []
 }

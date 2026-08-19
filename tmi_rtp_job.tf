@@ -102,6 +102,17 @@ resource "google_cloud_run_v2_job_iam_member" "portal_execute_tmi_rtp" {
   member   = each.value
 }
 
+# jobsExecutorWithOverrides cannot read execution status.
+resource "google_cloud_run_v2_job_iam_member" "portal_view_tmi_rtp" {
+  for_each = local.tmi_rtp_invokers
+
+  project  = var.project_id
+  location = var.region
+  name     = google_cloud_run_v2_job.tmi_rtp.name
+  role     = "roles/run.viewer"
+  member   = each.value
+}
+
 resource "google_service_account_iam_member" "portal_act_as_tmi_rtp_job" {
   for_each = local.tmi_rtp_invokers
 
