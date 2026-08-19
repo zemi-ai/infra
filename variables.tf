@@ -6,7 +6,7 @@ variable "project_id" {
 
 variable "region" {
   type        = string
-  description = "Default region. Datasets bucket, Artifact Registry, and Cloud Run Job must use this. App Hosting is us-east4 (not available in Canada)."
+  description = "Default region. Datasets bucket, Artifact Registry, Cloud Run Job, and Cloud Build must use this. App Hosting is us-east4 (not available in Canada)."
   default     = "northamerica-northeast1"
 }
 
@@ -28,6 +28,30 @@ variable "datasets_cors_origins" {
 variable "data_pipelines_repository_id" {
   type        = string
   description = "Artifact Registry Docker repo for data-pipelines images."
+  default     = "data-pipelines"
+}
+
+variable "tmi_rtp_image_name" {
+  type        = string
+  description = "Image name inside the Artifact Registry repo (not a tag)."
+  default     = "tmi-rtp"
+}
+
+variable "cloudbuild_github_connection" {
+  type        = string
+  description = "Existing Cloud Build 2nd gen GitHub host connection name in var.region. Create once in the console; OAuth cannot live in this repo. App Hosting's GitHub link is a different connection (us-east4)."
+  default     = "github-zemi-ai"
+}
+
+variable "data_pipelines_github_owner" {
+  type        = string
+  description = "GitHub org for the data-pipelines source repo."
+  default     = "zemi-ai"
+}
+
+variable "data_pipelines_github_repo" {
+  type        = string
+  description = "GitHub repository name (not the Artifact Registry repo id)."
   default     = "data-pipelines"
 }
 
