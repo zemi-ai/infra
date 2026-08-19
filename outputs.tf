@@ -33,6 +33,21 @@ output "data_pipelines_image_base" {
   value       = "${var.region}-docker.pkg.dev/${var.project_id}/${google_artifact_registry_repository.data_pipelines.repository_id}"
 }
 
+output "tmi_rtp_image_prefix" {
+  description = "tmi-rtp image without a tag (Cloud Build pushes :SHORT_SHA and :latest)."
+  value       = local.tmi_rtp_image_prefix
+}
+
+output "data_pipelines_build_service_account_email" {
+  description = "User-specified Cloud Build SA that pushes tmi-rtp."
+  value       = google_service_account.data_pipelines_build.email
+}
+
+output "data_pipelines_cloudbuild_trigger" {
+  description = "Cloud Build trigger that publishes tmi-rtp from main."
+  value       = google_cloudbuild_trigger.data_pipelines_main.name
+}
+
 output "tmi_rtp_job_name" {
   description = "Cloud Run Job name for TMI→RTP."
   value       = google_cloud_run_v2_job.tmi_rtp.name
