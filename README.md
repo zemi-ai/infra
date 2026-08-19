@@ -54,8 +54,7 @@ Browser uploads go **directly to Montreal GCS** (signed PUT). App Hosting only m
 | APIs (`google_project_service`) | GCP project + billing (exists) |
 | Dataset bucket, CORS, IAM | Firebase Auth users |
 | Artifact Registry repo | App Hosting ↔ GitHub |
-| Cloud Run Job + job SA | Wix DNS for `portal.zemi.ca` |
-| App Hosting SA `run.jobs.run` | |
+| Cloud Run Job + job SA + App Hosting execute IAM | Wix DNS for `portal.zemi.ca` |
 
 Do **not** put datasets, models, or client names in this repo.
 
