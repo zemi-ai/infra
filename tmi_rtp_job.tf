@@ -84,3 +84,28 @@ resource "google_cloud_run_v2_job" "tmi_rtp" {
     ignore_changes = [launch_stage]
   }
 }
+
+locals {
+  tmi_rtp_invokers = toset([
+    local.apphosting_compute_member,
+    google_service_account.portal.member,
+  ])
+}
+
+resource "google_cloud_run_v2_job_iam_member" "portal_execute_tmi_rtp" {
+  for_each = local.tmi_rtp_invokers
+
+  project  = var.project_id
+  location = var.region
+  name     = google_cloud_run_v2_job.tmi_rtp.name
+  role     = "roles/run.jobsExecutorWithOverrides"
+  member   = each.value
+}
+
+resource "google_service_account_iam_member" "portal_act_as_tmi_rtp_job" {
+  for_each = local.tmi_rtp_invokers
+
+  service_account_id = google_service_account.tmi_rtp_job.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = each.value
+}
