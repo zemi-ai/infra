@@ -22,10 +22,12 @@ resource "google_storage_bucket" "datasets" {
 
 locals {
   apphosting_compute_member = "serviceAccount:firebase-app-hosting-compute@${var.project_id}.iam.gserviceaccount.com"
-  # GCS IAM conditions allow startsWith/endsWith/extract, not matches().
-  # extract() returns the first {var}; do not compare it to raw/uploads/processed.
-  # A matching template is enough: empty string means the path is a different kind.
-  portal_object_cel    = "resource.name.startsWith('projects/_/buckets/${google_storage_bucket.datasets.name}/objects/customers/') && (resource.name.extract('/objects/customers/{org}/projects/{proj}/raw/') != '' || resource.name.extract('/objects/customers/{org}/projects/{proj}/uploads/') != '')"
+  # GCS IAM extract() takes one {placeholder}. A second {var} is literal suffix
+  # text, so /objects/customers/{org}/projects/{proj}/raw/ never matched and
+  # signed PUT got AccessDenied on storage.objects.create. Prefix /projects/
+  # plus suffix /raw/ or /uploads/ extracts the project id when the kind
+  # segment matches; processed/ stays empty.
+  portal_object_cel = "resource.name.startsWith('projects/_/buckets/${google_storage_bucket.datasets.name}/objects/customers/') && (resource.name.extract('/projects/{proj}/raw/') != '' || resource.name.extract('/projects/{proj}/uploads/') != '')"
   # GET for products. Use startsWith only — extract() templates did not grant
   # storage.objects.get on signed URLs (first capture is org id, not kind).
   portal_processed_cel = "resource.name.startsWith('projects/_/buckets/${google_storage_bucket.datasets.name}/objects/customers/')"
@@ -94,6 +96,22 @@ resource "google_storage_bucket_iam_member" "extra_objects" {
 
   condition {
     title       = "raw-and-uploads"
+    description = "customers/*/projects/*/raw and customers/*/projects/*/uploads only"
+    expression  = local.portal_object_cel
+  }
+}
+
+# objectUser with a resource.name condition did not grant
+# storage.objects.create on signed PUT. objectCreator with the same CEL does.
+resource "google_storage_bucket_iam_member" "portal_object_creator" {
+  for_each = local.portal_dataset_members
+
+  bucket = google_storage_bucket.datasets.name
+  role   = "roles/storage.objectCreator"
+  member = each.value
+
+  condition {
+    title       = "raw-and-uploads-create"
     description = "customers/*/projects/*/raw and customers/*/projects/*/uploads only"
     expression  = local.portal_object_cel
   }
