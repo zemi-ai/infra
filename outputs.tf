@@ -62,3 +62,18 @@ output "tmi_rtp_job_service_account_email" {
   description = "SA the TMI→RTP job runs as."
   value       = google_service_account.tmi_rtp_job.email
 }
+
+output "analyze_job_name" {
+  description = "Cloud Run Job name for analyze."
+  value       = google_cloud_run_v2_job.analyze.name
+}
+
+output "analyze_job_uri" {
+  description = "Fully qualified Cloud Run Job name."
+  value       = google_cloud_run_v2_job.analyze.id
+}
+
+output "analyze_job_service_account_email" {
+  description = "SA the analyze job runs as."
+  value       = google_service_account.analyze_job.email
+}
