@@ -84,6 +84,7 @@ customers/{orgId}/models/{modelId}/          # later: unified model across proje
 | `datasets.tf` | Landing bucket, portal SA, IAM |
 | `artifact_registry.tf` | Docker repo `data-pipelines` (TMI→RTP image) |
 | `tmi_rtp_job.tf` | Cloud Run Job `tmi-rtp` + job SA |
+| `analyze_job.tf` | Cloud Run Job `analyze` + job SA (portal `:run` IAM is separate) |
 | `cloud_build.tf` | Main-only trigger, build SA, Artifact Registry writer |
 
 A merge to `zemi-ai/data-pipelines` `main` builds `Dockerfile` and pushes `tmi-rtp:$SHORT_SHA` and `:latest`. This does **not** retarget the Cloud Run Job. Pin a digest in `tmi_rtp_image` and re-apply.
@@ -125,3 +126,18 @@ gcloud run jobs execute tmi-rtp \
 ```
 
 Required env: `ORG_ID`, `INPUT_GS`, `OUTPUT_PREFIX_GS`, `SURVEY_YEAR`, `SURVEY_ELEVATION_M`. Both URIs must be under `customers/{ORG_ID}/`. `INPUT_CRS` is required for Geosoft `.grd`. Outputs: `{stem}_rtp.tif`, `_anomaly.tif`, `_rtp_color.tif`, `_rtp_color.png`.
+
+## Analyze job (execute)
+
+The Job resource has no catalog or RTP URIs baked in. Pass them per execution. `OUTPUT_PREFIX_GS` is the processed **root** (`…/processed`), not a domain folder. Portal IAM to `:run` this job is a separate change.
+
+Pin `analyze_image` to a digest built after data-pipelines includes the ml extra (same image name as TMI→RTP).
+
+```bash
+gcloud run jobs execute analyze \
+  --region=northamerica-northeast1 \
+  --project=zemi-prod \
+  --update-env-vars=ORG_ID=ORG,OCCURRENCES_GS=gs://zemi-prod-datasets/customers/ORG/projects/PROJECT/processed/geology/occurrences.csv,ANALYZE_MANIFEST_GS=gs://zemi-prod-datasets/customers/ORG/projects/PROJECT/processed/ml/analyze_manifest.json,OUTPUT_PREFIX_GS=gs://zemi-prod-datasets/customers/ORG/projects/PROJECT/processed
+```
+
+Required env: `ORG_ID`, `OCCURRENCES_GS`, `ANALYZE_MANIFEST_GS`, `OUTPUT_PREFIX_GS`. Manifest JSON: `{"areas":[{"areaId":"area_a","rtpGs":"gs://…/processed/geophysics/area_a_rtp.tif"},…]}`. Outputs: `geology/{areaId}_negatives.*`, `ml/samples.csv`, `ml/model.joblib`, `geophysics/{stem}_prospectivity.tif` (+ color PNG).

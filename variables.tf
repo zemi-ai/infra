@@ -91,6 +91,42 @@ variable "tmi_rtp_timeout" {
   default     = "60s"
 }
 
+variable "analyze_job_name" {
+  type        = string
+  description = "Cloud Run Job name for the composed analyze pipeline."
+  default     = "analyze"
+}
+
+variable "analyze_image" {
+  type        = string
+  description = "Analyze image, pinned by digest. Same Dockerfile as TMI→RTP; pin a digest built after the ml extra is in the image."
+  default     = "northamerica-northeast1-docker.pkg.dev/zemi-prod/data-pipelines/tmi-rtp@sha256:12ca1208608f2dd74fe3b84b5c296131bc16282ab62578abbb4a02cf4e292d9d"
+}
+
+variable "analyze_cpu" {
+  type        = string
+  description = "Cloud Run Job CPU. Allowed: 1, 2, 4, 6, 8."
+  default     = "2"
+}
+
+variable "analyze_memory" {
+  type        = string
+  description = "Cloud Run Job memory (train + two score rasters)."
+  default     = "8Gi"
+}
+
+variable "analyze_scratch_disk" {
+  type        = string
+  description = "emptyDir size for WORK_DIR (disk, not RAM). Provider uses medium \"\" for disk."
+  default     = "16Gi"
+}
+
+variable "analyze_timeout" {
+  type        = string
+  description = "Per-attempt task timeout. Raised from TMI→RTP for train plus two score rasters."
+  default     = "600s"
+}
+
 variable "extra_signing_members" {
   type        = list(string)
   description = "Additional IAM members with objectUser on datasets raw/ and uploads/ prefixes and objectViewer on processed/ (same scope as the portal)."
