@@ -77,3 +77,18 @@ output "analyze_job_service_account_email" {
   description = "SA the analyze job runs as."
   value       = google_service_account.analyze_job.email
 }
+
+output "occurrences_job_name" {
+  description = "Cloud Run Job name for MINFILE labeling."
+  value       = google_cloud_run_v2_job.occurrences.name
+}
+
+output "occurrences_job_uri" {
+  description = "Fully qualified Cloud Run Job name."
+  value       = google_cloud_run_v2_job.occurrences.id
+}
+
+output "occurrences_job_service_account_email" {
+  description = "SA the occurrences job runs as."
+  value       = google_service_account.occurrences_job.email
+}
