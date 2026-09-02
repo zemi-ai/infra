@@ -136,7 +136,7 @@ variable "occurrences_job_name" {
 variable "occurrences_image" {
   type        = string
   description = "Occurrences image, pinned by digest. Same Dockerfile as TMI→RTP; pin a digest built after `zemi job occurrences` is in the image."
-  default     = "northamerica-northeast1-docker.pkg.dev/zemi-prod/data-pipelines/tmi-rtp@sha256:12ca1208608f2dd74fe3b84b5c296131bc16282ab62578abbb4a02cf4e292d9d"
+  default     = "northamerica-northeast1-docker.pkg.dev/zemi-prod/data-pipelines/tmi-rtp@sha256:a29a823d975ca0f05a800652d5f61cb788e7985b5e506a2511664d18327cb93b"
 }
 
 variable "occurrences_cpu" {
