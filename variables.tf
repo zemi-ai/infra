@@ -127,6 +127,42 @@ variable "analyze_timeout" {
   default     = "600s"
 }
 
+variable "occurrences_job_name" {
+  type        = string
+  description = "Cloud Run Job name for MINFILE labeling."
+  default     = "occurrences"
+}
+
+variable "occurrences_image" {
+  type        = string
+  description = "Occurrences image, pinned by digest. Same Dockerfile as TMI→RTP; pin a digest built after `zemi job occurrences` is in the image."
+  default     = "northamerica-northeast1-docker.pkg.dev/zemi-prod/data-pipelines/tmi-rtp@sha256:a29a823d975ca0f05a800652d5f61cb788e7985b5e506a2511664d18327cb93b"
+}
+
+variable "occurrences_cpu" {
+  type        = string
+  description = "Cloud Run Job CPU. Allowed: 1, 2, 4, 6, 8. CSV labeling is cheaper than a mag grid."
+  default     = "1"
+}
+
+variable "occurrences_memory" {
+  type        = string
+  description = "Cloud Run Job memory (MINFILE CSV, not a mag grid)."
+  default     = "2Gi"
+}
+
+variable "occurrences_scratch_disk" {
+  type        = string
+  description = "emptyDir size for WORK_DIR (disk, not RAM). Provider uses medium \"\" for disk."
+  default     = "4Gi"
+}
+
+variable "occurrences_timeout" {
+  type        = string
+  description = "Per-attempt task timeout. CSV labeling should finish well under this."
+  default     = "120s"
+}
+
 variable "extra_signing_members" {
   type        = list(string)
   description = "Additional IAM members with objectUser on datasets raw/ and uploads/ prefixes and objectViewer on processed/ (same scope as the portal)."

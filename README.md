@@ -84,6 +84,7 @@ customers/{orgId}/models/{modelId}/          # later: unified model across proje
 | `datasets.tf` | Landing bucket, portal SA, IAM |
 | `artifact_registry.tf` | Docker repo `data-pipelines` (TMI→RTP image) |
 | `tmi_rtp_job.tf` | Cloud Run Job `tmi-rtp` + job SA |
+| `occurrences_job.tf` | Cloud Run Job `occurrences` + job SA + portal `:run` IAM |
 | `analyze_job.tf` | Cloud Run Job `analyze` + job SA (portal `:run` IAM is separate) |
 | `cloud_build.tf` | Main-only trigger, build SA, Artifact Registry writer |
 
@@ -126,6 +127,21 @@ gcloud run jobs execute tmi-rtp \
 ```
 
 Required env: `ORG_ID`, `INPUT_GS`, `OUTPUT_PREFIX_GS`, `SURVEY_YEAR`, `SURVEY_ELEVATION_M`. Both URIs must be under `customers/{ORG_ID}/`. `INPUT_CRS` is required for Geosoft `.grd`. Outputs: `{stem}_rtp.tif`, `_anomaly.tif`, `_rtp_color.tif`, `_rtp_color.png`.
+
+## Occurrences job (execute)
+
+The Job resource has no MINFILE URI baked in. Pass it per execution. `OUTPUT_PREFIX_GS` is the geology prefix (`…/processed/geology`), not a filename. Catalog is always `occurrences.csv`.
+
+Pin `occurrences_image` to a digest built after data-pipelines includes `zemi job occurrences` (same image name as TMI→RTP).
+
+```bash
+gcloud run jobs execute occurrences \
+  --region=northamerica-northeast1 \
+  --project=zemi-prod \
+  --update-env-vars=ORG_ID=ORG,MINFILE_GS=gs://zemi-prod-datasets/customers/ORG/projects/PROJECT/raw/geology/minfile.csv,OUTPUT_PREFIX_GS=gs://zemi-prod-datasets/customers/ORG/projects/PROJECT/processed/geology
+```
+
+Required env: `ORG_ID`, `MINFILE_GS`, `OUTPUT_PREFIX_GS`. Both URIs must be under `customers/{ORG_ID}/`. Optional: `SOURCE` (default `bc_gis`), `PROJECTED_CRS` (default `EPSG:26909`). Output: `occurrences.csv`.
 
 ## Analyze job (execute)
 
