@@ -85,7 +85,7 @@ customers/{orgId}/models/{modelId}/          # later: unified model across proje
 | `artifact_registry.tf` | Docker repo `data-pipelines` (TMI→RTP image) |
 | `tmi_rtp_job.tf` | Cloud Run Job `tmi-rtp` + job SA |
 | `occurrences_job.tf` | Cloud Run Job `occurrences` + job SA + portal `:run` IAM |
-| `analyze_job.tf` | Cloud Run Job `analyze` + job SA (portal `:run` IAM is separate) |
+| `analyze_job.tf` | Cloud Run Job `analyze` + job SA + portal `:run` IAM |
 | `cloud_build.tf` | Main-only trigger, build SA, Artifact Registry writer |
 
 A merge to `zemi-ai/data-pipelines` `main` builds `Dockerfile` and pushes `tmi-rtp:$SHORT_SHA` and `:latest`. This does **not** retarget the Cloud Run Job. Pin a digest in `tmi_rtp_image` and re-apply.
@@ -145,7 +145,7 @@ Required env: `ORG_ID`, `MINFILE_GS`, `OUTPUT_PREFIX_GS`. Both URIs must be unde
 
 ## Analyze job (execute)
 
-The Job resource has no catalog or RTP URIs baked in. Pass them per execution. `OUTPUT_PREFIX_GS` is the processed **root** (`…/processed`), not a domain folder. Portal IAM to `:run` this job is a separate change.
+The Job resource has no catalog or RTP URIs baked in. Pass them per execution. `OUTPUT_PREFIX_GS` is the processed **root** (`…/processed`), not a domain folder. App Hosting and the portal SA can `:run` and poll this job (same pattern as TMI→RTP).
 
 Pin `analyze_image` to a digest built after data-pipelines includes the ml extra (same image name as TMI→RTP).
 
