@@ -147,7 +147,7 @@ Required env: `ORG_ID`, `MINFILE_GS`, `OUTPUT_PREFIX_GS`. Both URIs must be unde
 
 The Job resource has no catalog or RTP URIs baked in. Pass them per execution. `OUTPUT_PREFIX_GS` is the processed **root** (`…/processed`), not a domain folder. App Hosting and the portal SA can `:run` and poll this job (same pattern as TMI→RTP).
 
-Pin `analyze_image` to a digest built after data-pipelines includes the ml extra (same image name as TMI→RTP).
+Pin `analyze_image` to a digest built after data-pipelines includes `zemi job analyze` (same image name as TMI→RTP).
 
 ```bash
 gcloud run jobs execute analyze \
